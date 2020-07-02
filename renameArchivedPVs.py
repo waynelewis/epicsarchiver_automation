@@ -16,28 +16,40 @@ import datetime
 import shlex
 import logging
 import requests
+import time
 
 from utils import configureLogging
 
 logger = logging.getLogger(__name__)
 
 def readInputData(file_name):
-    with open(filename, 'r') as f:
-    pvs = [tuple(line) for line in csv.reader(f)]
+    with open(file_name, 'r') as f:
+        pvs = [tuple(line) for line in csv.reader(f)]
     return pvs
 
 def renamePVs(bplURL, pvs):
     '''Rename all PVs in list.'''
     for (old_name, new_name) in pvs:
+        old_name = old_name.strip()
+        new_name = new_name.strip()
+        
+        print('Renaming from {} to {}'.format(old_name, new_name))
+
         url = bplURL + '/pauseArchivingPV'
-        print(url)
-        #pausedPV = requests.post(url, pv=old_name).json()
+        parameters = {'pv': old_name}
+        pausedPV = requests.get(url, params=parameters)
+
+	time.sleep(0.1)
+	
         url = bplURL + '/renamePV'
-        print(url)
-        #renamedPV = requests.post(url, pv=old_name, newname=new_name)
+        parameters = {'pv': old_name, 'newname': new_name}
+        renamedPV = requests.get(url, params = parameters)
+
+	time.sleep(0.1)
+
         url = bplURL + '/resumeArchivingPV'
-        print(url)
-        #renamedPV = requests.post(url, pv=new_name)
+        parameters = {'pv': new_name}
+        resumedPV = requests.get(url, params = parameters)
 
 
 if __name__ == "__main__":
